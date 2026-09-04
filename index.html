@@ -384,6 +384,27 @@ function animatePick(pool) {
   }, 90);
 }
 
+function getDoneToday() {
+  const data = JSON.parse(localStorage.getItem('doneToday') || '{}');
+  if (data.date !== new Date().toDateString()) return [];
+  return data.items || [];
+}
+
+function markDone(itemText) {
+  const done = getDoneToday();
+  done.push(itemText);
+  localStorage.setItem('doneToday', JSON.stringify({
+    date: new Date().toDateString(),
+    items: done
+  }));
+}
+
+
+function getAvailableItems() {
+  const done = getDoneToday();
+  return allItems.filter(i => !done.includes(i.text));
+}
+
 // iOS Safari doesn't expose an install prompt, so the note is intentionally
 // shown only when the app is not already running in standalone mode.
 const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
