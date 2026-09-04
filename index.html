@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FAFAFA">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="도파민 메뉴">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>작은 도파민 메뉴</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --text: #2D2D2D;
+    --muted: #888;
+    --green: #4A7C59;
+    --blue: #2E6B8A;
+  }
+
+  html { background: #FAFAFA; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', system-ui, sans-serif;
+    background: #FAFAFA;
+    color: var(--text);
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  button { font: inherit; }
+
+  .wrap {
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: max(24px, env(safe-area-inset-top)) 18px 40px;
+  }
+
+  .header {
+    text-align: center;
+    padding: 12px 0 22px;
+  }
+  .header small {
+    font-size: 12px;
+    letter-spacing: .1em;
+    color: #999;
+  }
+  .header h1 {
+    font-size: 25px;
+    font-weight: 750;
+    margin-top: 6px;
+    line-height: 1.3;
+  }
+  .header p {
+    font-size: 14px;
+    color: #777;
+    margin-top: 7px;
+  }
+
+  .random-btn {
+    display: block;
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    border: 0;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 5px 14px rgba(46, 107, 138, .14);
+    transition: transform .1s, opacity .15s;
+  }
+  .random-btn:active { transform: scale(.985); opacity: .88; }
+  .random-btn.spinning { background: #999; }
+
+  .picked {
+    margin: 12px 0 18px;
+    padding: 17px 18px;
+    border-radius: 13px;
+    border-left: 4px solid;
+    animation: fadeIn .25s ease;
+  }
+  .picked .cat-label { font-size: 12px; font-weight: 700; }
+  .picked .pick-text { font-size: 17px; font-weight: 700; margin-top: 6px; line-height: 1.45; }
+
+  .quick-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #999;
+    margin: 22px 0 9px 2px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .quick-btn {
+    border: 0;
+    padding: 11px 10px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px #eee;
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .quick-btn:active { transform: scale(.98); }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 3px 1px 5px;
+    margin: 22px 0 16px;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 0 0 auto;
+    padding: 7px 13px;
+    font-size: 13px;
+    font-weight: 550;
+    border: 0;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  .category { margin-bottom: 21px; }
+  .cat-title {
+    font-size: 15px;
+    font-weight: 750;
+    margin: 0 0 10px 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cat-title .count { font-size: 11px; font-weight: 500; color: #aaa; }
+
+  .items { display: flex; flex-wrap: wrap; gap: 7px; }
+  .item {
+    padding: 8px 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    border-radius: 10px;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #bbb;
+    margin-top: 30px;
+    line-height: 1.5;
+  }
+
+  .install-note {
+    display: none;
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f1f5f2;
+    color: #607064;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .install-note.show { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (min-width: 700px) {
+    .wrap { padding-top: 36px; }
+    .header h1 { font-size: 28px; }
+    .quick-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <header class="header">
+    <small>딴짓 대신</small>
+    <h1>작은 도파민 메뉴 🎲</h1>
+    <p>5분이면 충분해. 하나만 골라봐!</p>
+  </header>
+
+  <button class="random-btn" id="randomBtn" onclick="pickRandom()">
+    🎲 랜덤으로 하나 뽑기
+  </button>
+
+  <div id="pickedArea"></div>
+
+  <div class="quick-title">지금 내 상태는?</div>
+  <div class="quick-grid">
+    <button class="quick-btn" onclick="pickFrom(['health','etc'])">🪫 너무 피곤해</button>
+    <button class="quick-btn" onclick="pickFrom(['health','english','dev','etc'])">🫠 집중이 안 돼</button>
+    <button class="quick-btn" onclick="pickFrom(['health'])">🧘 몸이 찌뿌둥해</button>
+    <button class="quick-btn" onclick="pickFrom(['beauty','etc'])">✨ 나를 돌보고 싶어</button>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="lists"></div>
+
+  <p class="footer">폰 들기 전에 여기서 하나만 먼저 ✊</p>
+  <p class="install-note" id="installNote">
+    💡 이 페이지를 Safari에서 열고 <b>공유 → 홈 화면에 추가</b>하면 앱처럼 바로 열 수 있어요.
+  </p>
+</div>
+
+<script>
+const CATEGORIES = [
+  { id:"health", label:"건강/운동", emoji:"🦴", color:"#4A7C59", bg:"#EEF5F0",
+    items:[
+      "피지오 루틴 (wall squat, hip flexion 등)",
+      "폼롤러 굴리기",
+      "다리 마사지",
+      "악력기 30회",
+      "한 발 서기 1분씩",
+      "손목·발목 모빌리티",
+      "눈 운동 (20-20-20)",
+      "스트레칭 5분",
+      "명상 5분",
+      "목·승모근 스트레칭",
+      "고관절 mobility 5분",
+      "종아리·발바닥 마사지",
+      "누워서 다리 올리고 5분",
+      "5분 산책",
+      "물 한 컵 + 창문 열기"
+    ]},
+  { id:"beauty", label:"미용", emoji:"✨", color:"#8B6F8E", bg:"#F3EEF4",
+    items:[
+      "괄사 마사지",
+      "핸드크림 + 손 마사지",
+      "두피 마사지",
+      "네일 케어 (큐티클, 버퍼)",
+      "페이스 요가 3분",
+      "페이스 마사지",
+      "목·쇄골 마사지",
+      "발 마사지",
+      "바디로션 바르기",
+      "립밤 + 큐티클 오일"
+    ]},
+  { id:"english", label:"영어", emoji:"📖", color:"#B8860B", bg:"#F7F3E8",
+    items:[
+      "원서 5분 읽기",
+      "원서 2쪽 소리 내어 읽기",
+      "원서 필사 1단락",
+      "좋아하는 문장 1개 필사",
+      "딕테이션 1문장 + 쉐도잉",
+      "쉐도잉 1문장 × 5",
+      "눈앞 물건 5개 영어로 묘사",
+      "어제 일 영어 혼잣말 3문장",
+      "지금 보이는 것 5개 영어로 묘사",
+      "노래 가사 한 구절 따라 적기",
+      "영영사전 랜덤 단어 + 예문 읽기",
+      "오늘 본 영어 문장 하나 따라 읽기",
+      "오늘 있었던 일 영어로 3문장"
+    ]},
+  { id:"dev", label:"개발", emoji:"💻", color:"#2E6B8A", bg:"#ECF3F7",
+    items:[
+      "TS/Angular 퀴즈 1문제",
+      "내 PR 하나 열어서 회고 30초",
+      "GitHub Trending 훑기",
+      "기술 블로그 글 제목 스캔 + 북마크",
+      "CLI 명령어 하나 새로 외우기",
+      "오늘 작성한 함수 하나 다시 읽기",
+      "최근 PR comment 하나 다시 보기",
+      "최근 bug 원인을 한 문장으로 설명",
+      "오늘 배운 것 한 줄 기록",
+      "내 코드의 이름 하나 개선해보기",
+      "TS utility type 하나 복습",
+      "Angular 개념 하나 복습",
+      "최근 작업을 면접 답변처럼 30초 설명"
+    ]},
+  { id:"etc", label:"기타", emoji:"🌿", color:"#6B7B6E", bg:"#F0F2F0",
+    items:[
+      "책상 주변 정리",
+      "물 한 잔 천천히",
+      "감사한 거 3개 적기",
+      "창문 열고 바깥 바람 1분",
+      "노래 한 곡 풀볼륨 (폰 엎어놓고)",
+      "내일 입을 옷 꺼내놓기",
+      "냉장고 한 칸 정리",
+      "책 5쪽 읽기",
+      "책상 위 물건 5개 제자리",
+      "서랍 하나 정리",
+      "브라우저 탭 10개 닫기",
+      "휴대폰 사진 10장 삭제",
+      "오늘의 증거 ⭐ 한 줄 적기",
+      "지금 필요한 것 하나 적기"
+    ]}
+];
+
+const allItems = CATEGORIES.flatMap(c => c.items.map(text => ({ text, cat:c })));
+let activeTab = null;
+let spinningTimer = null;
+
+function renderTabs() {
+  const el = document.getElementById("tabs");
+  let html = `<button class="tab" style="${activeTab===null
+    ? 'background:#2D2D2D;color:#fff;font-weight:700'
+    : 'background:#F0F0F0;color:#555'}" onclick="setTab(null)">전체</button>`;
+
+  CATEGORIES.forEach(c => {
+    const on = activeTab === c.id;
+    html += `<button class="tab" style="background:${on?c.color:c.bg};color:${on?'#fff':c.color};${on?'font-weight:700':''}"
+      onclick="setTab('${c.id}')">${c.emoji} ${c.label}</button>`;
+  });
+  el.innerHTML = html;
+}
+
+function renderLists() {
+  const el = document.getElementById("lists");
+  const cats = activeTab ? CATEGORIES.filter(c => c.id === activeTab) : CATEGORIES;
+
+  el.innerHTML = cats.map(c => `
+    <section class="category">
+      <div class="cat-title" style="color:${c.color}">
+        ${c.emoji} ${c.label}
+        <span class="count">${c.items.length}</span>
+      </div>
+      <div class="items">
+        ${c.items.map(item => `<div class="item" style="background:${c.bg}">${escapeHtml(item)}</div>`).join("")}
+      </div>
+    </section>
+  `).join("");
+}
+
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+  }[ch]));
+}
+
+function setTab(id) {
+  activeTab = activeTab === id ? null : id;
+  renderTabs();
+  renderLists();
+}
+
+function pickFrom(categoryIds) {
+  const pool = allItems.filter(item => categoryIds.includes(item.cat.id));
+  animatePick(pool.length ? pool : allItems);
+}
+
+function pickRandom() {
+  animatePick(allItems);
+}
+
+function animatePick(pool) {
+  if (spinningTimer) clearInterval(spinningTimer);
+
+  const btn = document.getElementById("randomBtn");
+  const area = document.getElementById("pickedArea");
+  btn.classList.add("spinning");
+  btn.textContent = "고르는 중...";
+  btn.disabled = true;
+  area.innerHTML = "";
+
+  let count = 0;
+  spinningTimer = setInterval(() => {
+    const r = pool[Math.floor(Math.random() * pool.length)];
+
+    area.innerHTML = `
+      <div class="picked" style="background:${r.cat.bg};border-color:${r.cat.color}">
+        <div class="cat-label" style="color:${r.cat.color}">${r.cat.emoji} ${r.cat.label}</div>
+        <div class="pick-text">${escapeHtml(r.text)}</div>
+      </div>`;
+
+    count++;
+    if (count > 12) {
+      clearInterval(spinningTimer);
+      spinningTimer = null;
+      btn.classList.remove("spinning");
+      btn.textContent = "🎲 다시 뽑기";
+      btn.disabled = false;
+    }
+  }, 90);
+}
+
+// iOS Safari doesn't expose an install prompt, so the note is intentionally
+// shown only when the app is not already running in standalone mode.
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+if (!isStandalone) {
+  document.getElementById("installNote").classList.add("show");
+}
+
+renderTabs();
+renderLists();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
